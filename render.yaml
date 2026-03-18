@@ -1,0 +1,32 @@
+# Render Infrastructure-as-Code
+# Push this repo to GitHub, then connect it on render.com
+# Both services are deployed from the same repository.
+
+services:
+
+  # ── Backend: Node.js Web Service ─────────────────────────────────────────
+  - type: web
+    name: codenest-server
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 10000
+    # Free tier spins down after 15 min inactivity — first request may be slow.
+
+  # ── Frontend: Static Site ─────────────────────────────────────────────────
+  - type: web
+    name: codenest-client
+    runtime: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_SERVER_URL
+        sync: false   # Set this manually in Render dashboard after backend deploys
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
